@@ -1,4 +1,5 @@
 #ifndef __TARO_H__
+#define __TARO_H__
 #include <stdint.h>
 
 #define TARO_STACK_SIZE 256

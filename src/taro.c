@@ -116,6 +116,20 @@ static TaroReturnCode taro_frame_step(TaroFrame *const frame,
     frame->stack[rd] = frame->stack[r1] / frame->stack[r2];
     frame->pc += 4;
     break;
+  case SHL:
+    rd = OPCODE_RD(taro, frame);
+    r1 = OPCODE_R1(taro, frame);
+    r2 = OPCODE_R2(taro, frame);
+    frame->stack[rd] = frame->stack[r1] << frame->stack[r2];
+    frame->pc += 4;
+    break;
+  case SHR:
+    rd = OPCODE_RD(taro, frame);
+    r1 = OPCODE_R1(taro, frame);
+    r2 = OPCODE_R2(taro, frame);
+    frame->stack[rd] = frame->stack[r1] >> frame->stack[r2];
+    frame->pc += 4;
+    break;
   case LDI:
     rd = OPCODE_RD(taro, frame);
     frame->pc += 2;

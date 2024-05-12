@@ -2,6 +2,7 @@
 #define __TARO_H__
 #include <stdint.h>
 
+#define TARO_EXEC_START 0x1000
 #define TARO_STACK_SIZE 256
 #define ALLOC_FUNC malloc
 #define DEALLOC_FUNC free
@@ -40,4 +41,5 @@ typedef struct TaroReturn {
 
 TaroReturn taro_new(uint32_t const mem_size);
 TaroReturnCode taro_load(Taro *const taro, uint8_t *mem, uint32_t mem_size);
+TaroReturnCode taro_run(Taro *const taro);
 #endif /* ifndef __TARO_H__ */

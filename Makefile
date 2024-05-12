@@ -4,7 +4,6 @@ TEST_DIR := ./test
 INC_DIRS := $(shell find $(SRC_DIR) -type d)
 TEST_INC := $(shell find $(TEST_DIR) -type d)
 
-
 TARO_LIB := $(BUILD_DIR)/taro.a
 TARO_TEST := $(BUILD_DIR)/taro_test
 

@@ -28,6 +28,8 @@ typedef enum TaroOpcode {
   LDI,
   ST,
   MOV,
+  PUSH, // push to next frame to be called
+  PULL, // pull from next frame to be called
   // control flow
   JMP,
   JCN,

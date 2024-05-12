@@ -34,9 +34,9 @@ UTEST(taro, ld) {
   TaroReturnCode rc = taro_load(&t, mem, sizeof(mem));
   ASSERT_EQ(rc, TARO_OK);
   ASSERT_EQ(taro_run(&t), TARO_BRK);
-  ASSERT_EQ(t.threads[0].frames[0].stack[0], 1);
-  ASSERT_EQ(t.threads[0].frames[0].stack[1], 1);
-  ASSERT_EQ(t.threads[0].frames[0].stack[2], (*(uint32_t *)(&mem[2])));
+  ASSERT_EQ(t.threads[0].frames[0].regs[0], 1);
+  ASSERT_EQ(t.threads[0].frames[0].regs[1], 1);
+  ASSERT_EQ(t.threads[0].frames[0].regs[2], (*(uint32_t *)(&mem[2])));
 }
 
 UTEST(taro, st) {
@@ -49,9 +49,9 @@ UTEST(taro, st) {
   TaroReturnCode rc = taro_load(&t, mem, sizeof(mem));
   ASSERT_EQ(rc, TARO_OK);
   ASSERT_EQ(taro_run(&t), TARO_BRK);
-  ASSERT_EQ(t.threads[0].frames[0].stack[0], 1);
-  ASSERT_EQ(t.threads[0].frames[0].stack[1], 0x47);
-  ASSERT_EQ(t.threads[0].frames[0].stack[2], 0x0FF);
+  ASSERT_EQ(t.threads[0].frames[0].regs[0], 1);
+  ASSERT_EQ(t.threads[0].frames[0].regs[1], 0x47);
+  ASSERT_EQ(t.threads[0].frames[0].regs[2], 0x0FF);
   ASSERT_EQ(t.mem.mem[0x47 + 1], 0xFF);
 }
 
@@ -65,9 +65,9 @@ UTEST(taro, mov) {
   TaroReturnCode rc = taro_load(&t, mem, sizeof(mem));
   ASSERT_EQ(rc, TARO_OK);
   ASSERT_EQ(taro_run(&t), TARO_BRK);
-  ASSERT_EQ(t.threads[0].frames[0].stack[0], 1);
-  ASSERT_EQ(t.threads[0].frames[0].stack[1], 0x47);
-  ASSERT_EQ(t.threads[0].frames[0].stack[2], 0x01);
+  ASSERT_EQ(t.threads[0].frames[0].regs[0], 1);
+  ASSERT_EQ(t.threads[0].frames[0].regs[1], 0x47);
+  ASSERT_EQ(t.threads[0].frames[0].regs[2], 0x01);
 }
 
 UTEST(taro, push) {
@@ -80,10 +80,10 @@ UTEST(taro, push) {
   TaroReturnCode rc = taro_load(&t, mem, sizeof(mem));
   ASSERT_EQ(rc, TARO_OK);
   ASSERT_EQ(taro_run(&t), TARO_BRK);
-  ASSERT_EQ(t.threads[0].frames[0].stack[0], 0x78);
-  ASSERT_EQ(t.threads[0].frames[0].stack[1], 0x47);
-  ASSERT_EQ(t.threads[0].frames[0].stack[2], 0xFF);
-  ASSERT_EQ(t.threads[0].frames[1].stack[1], 0x78);
+  ASSERT_EQ(t.threads[0].frames[0].regs[0], 0x78);
+  ASSERT_EQ(t.threads[0].frames[0].regs[1], 0x47);
+  ASSERT_EQ(t.threads[0].frames[0].regs[2], 0xFF);
+  ASSERT_EQ(t.threads[0].frames[1].regs[1], 0x78);
 }
 
 UTEST(taro, pull) {
@@ -93,13 +93,13 @@ UTEST(taro, pull) {
   };
   TaroReturn tr = taro_new(sizeof(mem));
   Taro t = tr.taro;
-  t.threads[0].frames[1].stack[0] = 0x69;
+  t.threads[0].frames[1].regs[0] = 0x69;
   TaroReturnCode rc = taro_load(&t, mem, sizeof(mem));
   ASSERT_EQ(rc, TARO_OK);
   ASSERT_EQ(taro_run(&t), TARO_BRK);
-  ASSERT_EQ(t.threads[0].frames[0].stack[0], 0x78);
-  ASSERT_EQ(t.threads[0].frames[0].stack[1], 0x69);
-  ASSERT_EQ(t.threads[0].frames[0].stack[2], 0xFF);
+  ASSERT_EQ(t.threads[0].frames[0].regs[0], 0x78);
+  ASSERT_EQ(t.threads[0].frames[0].regs[1], 0x69);
+  ASSERT_EQ(t.threads[0].frames[0].regs[2], 0xFF);
 }
 
 UTEST(taro, add) {
@@ -112,9 +112,9 @@ UTEST(taro, add) {
   TaroReturnCode rc = taro_load(&t, mem, sizeof(mem));
   ASSERT_EQ(rc, TARO_OK);
   ASSERT_EQ(taro_run(&t), TARO_BRK);
-  ASSERT_EQ(t.threads[0].frames[0].stack[0], 1);
-  ASSERT_EQ(t.threads[0].frames[0].stack[1], 1);
-  ASSERT_EQ(t.threads[0].frames[0].stack[2], 2);
+  ASSERT_EQ(t.threads[0].frames[0].regs[0], 1);
+  ASSERT_EQ(t.threads[0].frames[0].regs[1], 1);
+  ASSERT_EQ(t.threads[0].frames[0].regs[2], 2);
 }
 
 UTEST(taro, sub) {
@@ -127,9 +127,9 @@ UTEST(taro, sub) {
   TaroReturnCode rc = taro_load(&t, mem, sizeof(mem));
   ASSERT_EQ(rc, TARO_OK);
   ASSERT_EQ(taro_run(&t), TARO_BRK);
-  ASSERT_EQ(t.threads[0].frames[0].stack[0], 3);
-  ASSERT_EQ(t.threads[0].frames[0].stack[1], 4);
-  ASSERT_EQ(t.threads[0].frames[0].stack[2], -1);
+  ASSERT_EQ(t.threads[0].frames[0].regs[0], 3);
+  ASSERT_EQ(t.threads[0].frames[0].regs[1], 4);
+  ASSERT_EQ(t.threads[0].frames[0].regs[2], -1);
 }
 
 UTEST(taro, mul) {
@@ -142,9 +142,9 @@ UTEST(taro, mul) {
   TaroReturnCode rc = taro_load(&t, mem, sizeof(mem));
   ASSERT_EQ(rc, TARO_OK);
   ASSERT_EQ(taro_run(&t), TARO_BRK);
-  ASSERT_EQ(t.threads[0].frames[0].stack[0], 3);
-  ASSERT_EQ(t.threads[0].frames[0].stack[1], 4);
-  ASSERT_EQ(t.threads[0].frames[0].stack[2], 12);
+  ASSERT_EQ(t.threads[0].frames[0].regs[0], 3);
+  ASSERT_EQ(t.threads[0].frames[0].regs[1], 4);
+  ASSERT_EQ(t.threads[0].frames[0].regs[2], 12);
 }
 
 UTEST(taro, div) {
@@ -157,9 +157,9 @@ UTEST(taro, div) {
   TaroReturnCode rc = taro_load(&t, mem, sizeof(mem));
   ASSERT_EQ(rc, TARO_OK);
   ASSERT_EQ(taro_run(&t), TARO_BRK);
-  ASSERT_EQ(t.threads[0].frames[0].stack[0], 10);
-  ASSERT_EQ(t.threads[0].frames[0].stack[1], 5);
-  ASSERT_EQ(t.threads[0].frames[0].stack[2], 2);
+  ASSERT_EQ(t.threads[0].frames[0].regs[0], 10);
+  ASSERT_EQ(t.threads[0].frames[0].regs[1], 5);
+  ASSERT_EQ(t.threads[0].frames[0].regs[2], 2);
 }
 
 UTEST(taro, shl) {
@@ -172,9 +172,9 @@ UTEST(taro, shl) {
   TaroReturnCode rc = taro_load(&t, mem, sizeof(mem));
   ASSERT_EQ(rc, TARO_OK);
   ASSERT_EQ(taro_run(&t), TARO_BRK);
-  ASSERT_EQ(t.threads[0].frames[0].stack[0], 1);
-  ASSERT_EQ(t.threads[0].frames[0].stack[1], 5);
-  ASSERT_EQ(t.threads[0].frames[0].stack[2], (1 << 5));
+  ASSERT_EQ(t.threads[0].frames[0].regs[0], 1);
+  ASSERT_EQ(t.threads[0].frames[0].regs[1], 5);
+  ASSERT_EQ(t.threads[0].frames[0].regs[2], (1 << 5));
 }
 
 UTEST(taro, shr) {
@@ -187,9 +187,9 @@ UTEST(taro, shr) {
   TaroReturnCode rc = taro_load(&t, mem, sizeof(mem));
   ASSERT_EQ(rc, TARO_OK);
   ASSERT_EQ(taro_run(&t), TARO_BRK);
-  ASSERT_EQ(t.threads[0].frames[0].stack[0], 0x10);
-  ASSERT_EQ(t.threads[0].frames[0].stack[1], 4);
-  ASSERT_EQ(t.threads[0].frames[0].stack[2], (0x10 >> 4));
+  ASSERT_EQ(t.threads[0].frames[0].regs[0], 0x10);
+  ASSERT_EQ(t.threads[0].frames[0].regs[1], 4);
+  ASSERT_EQ(t.threads[0].frames[0].regs[2], (0x10 >> 4));
 }
 
 UTEST(taro, and) {
@@ -202,9 +202,9 @@ UTEST(taro, and) {
   TaroReturnCode rc = taro_load(&t, mem, sizeof(mem));
   ASSERT_EQ(rc, TARO_OK);
   ASSERT_EQ(taro_run(&t), TARO_BRK);
-  ASSERT_EQ(t.threads[0].frames[0].stack[0], 0x12);
-  ASSERT_EQ(t.threads[0].frames[0].stack[1], 0x02);
-  ASSERT_EQ(t.threads[0].frames[0].stack[2], 0x02);
+  ASSERT_EQ(t.threads[0].frames[0].regs[0], 0x12);
+  ASSERT_EQ(t.threads[0].frames[0].regs[1], 0x02);
+  ASSERT_EQ(t.threads[0].frames[0].regs[2], 0x02);
 }
 
 UTEST(taro, or) {
@@ -217,9 +217,9 @@ UTEST(taro, or) {
   TaroReturnCode rc = taro_load(&t, mem, sizeof(mem));
   ASSERT_EQ(rc, TARO_OK);
   ASSERT_EQ(taro_run(&t), TARO_BRK);
-  ASSERT_EQ(t.threads[0].frames[0].stack[0], 0x10);
-  ASSERT_EQ(t.threads[0].frames[0].stack[1], 0x0F);
-  ASSERT_EQ(t.threads[0].frames[0].stack[2], 0x1F);
+  ASSERT_EQ(t.threads[0].frames[0].regs[0], 0x10);
+  ASSERT_EQ(t.threads[0].frames[0].regs[1], 0x0F);
+  ASSERT_EQ(t.threads[0].frames[0].regs[2], 0x1F);
 }
 
 UTEST(taro, not ) {
@@ -231,8 +231,8 @@ UTEST(taro, not ) {
   TaroReturnCode rc = taro_load(&t, mem, sizeof(mem));
   ASSERT_EQ(rc, TARO_OK);
   ASSERT_EQ(taro_run(&t), TARO_BRK);
-  ASSERT_EQ(t.threads[0].frames[0].stack[0], 0x10);
-  ASSERT_EQ(t.threads[0].frames[0].stack[2], ~0x10);
+  ASSERT_EQ(t.threads[0].frames[0].regs[0], 0x10);
+  ASSERT_EQ(t.threads[0].frames[0].regs[2], ~0x10);
 }
 
 UTEST(taro, xor) {
@@ -245,9 +245,9 @@ UTEST(taro, xor) {
   TaroReturnCode rc = taro_load(&t, mem, sizeof(mem));
   ASSERT_EQ(rc, TARO_OK);
   ASSERT_EQ(taro_run(&t), TARO_BRK);
-  ASSERT_EQ(t.threads[0].frames[0].stack[0], 0x10);
-  ASSERT_EQ(t.threads[0].frames[0].stack[1], 0x0F);
-  ASSERT_EQ(t.threads[0].frames[0].stack[2], (0x10 ^ 0x0F));
+  ASSERT_EQ(t.threads[0].frames[0].regs[0], 0x10);
+  ASSERT_EQ(t.threads[0].frames[0].regs[1], 0x0F);
+  ASSERT_EQ(t.threads[0].frames[0].regs[2], (0x10 ^ 0x0F));
 }
 
 UTEST(taro, mod) {
@@ -260,7 +260,7 @@ UTEST(taro, mod) {
   TaroReturnCode rc = taro_load(&t, mem, sizeof(mem));
   ASSERT_EQ(rc, TARO_OK);
   ASSERT_EQ(taro_run(&t), TARO_BRK);
-  ASSERT_EQ(t.threads[0].frames[0].stack[0], 0x10);
-  ASSERT_EQ(t.threads[0].frames[0].stack[1], 0x0F);
-  ASSERT_EQ(t.threads[0].frames[0].stack[2], (0x10 % 0x0F));
+  ASSERT_EQ(t.threads[0].frames[0].regs[0], 0x10);
+  ASSERT_EQ(t.threads[0].frames[0].regs[1], 0x0F);
+  ASSERT_EQ(t.threads[0].frames[0].regs[2], (0x10 % 0x0F));
 }

@@ -70,8 +70,17 @@ TaroReturnCode taro_load(Taro *const taro, uint8_t *mem, uint32_t mem_size) {
 
 #define CHECK_REGS(rd, r1, r2)                                                 \
   do {                                                                         \
-    if (rd > frame->sp || r1 > frame->sp || r2 > frame->sp) {                  \
+    if (rd > TARO_MAX_REGISTERS || r1 > TARO_MAX_REGISTERS ||                  \
+        r2 > TARO_MAX_REGISTERS) {                                             \
       return TARO_ERROR_REG;                                                   \
+    }                                                                          \
+  } while (0)
+
+#define CHECK_REGS_NO_ZERO(rd, r1, rs)                                         \
+  do {                                                                         \
+    CHECK_REGS(rd, r1, rs);                                                    \
+    if (rd == TARO_ZERO_REG) {                                                 \
+      return TARO_ERROR_ZERO_REG_WRITE;                                        \
     }                                                                          \
   } while (0)
 
@@ -94,121 +103,138 @@ static TaroReturnCode taro_frame_step(TaroFrame *const frame,
     rd = OPCODE_RD(taro, frame);
     r1 = OPCODE_R1(taro, frame);
     r2 = OPCODE_R2(taro, frame);
-    frame->stack[rd] = frame->stack[r1] + frame->stack[r2];
+    CHECK_REGS_NO_ZERO(rd, r1, r2);
+    frame->regs[rd] = frame->regs[r1] + frame->regs[r2];
     frame->pc += 4;
     break;
   case SUB:
     rd = OPCODE_RD(taro, frame);
     r1 = OPCODE_R1(taro, frame);
     r2 = OPCODE_R2(taro, frame);
-    frame->stack[rd] = frame->stack[r1] - frame->stack[r2];
+    CHECK_REGS_NO_ZERO(rd, r1, r2);
+    frame->regs[rd] = frame->regs[r1] - frame->regs[r2];
     frame->pc += 4;
     break;
   case MUL:
     rd = OPCODE_RD(taro, frame);
     r1 = OPCODE_R1(taro, frame);
     r2 = OPCODE_R2(taro, frame);
-    frame->stack[rd] = frame->stack[r1] * frame->stack[r2];
+    CHECK_REGS_NO_ZERO(rd, r1, r2);
+    frame->regs[rd] = frame->regs[r1] * frame->regs[r2];
     frame->pc += 4;
     break;
   case DIV:
     rd = OPCODE_RD(taro, frame);
     r1 = OPCODE_R1(taro, frame);
     r2 = OPCODE_R2(taro, frame);
-    frame->stack[rd] = frame->stack[r1] / frame->stack[r2];
+    CHECK_REGS_NO_ZERO(rd, r1, r2);
+    frame->regs[rd] = frame->regs[r1] / frame->regs[r2];
     frame->pc += 4;
     break;
   case SHL:
     rd = OPCODE_RD(taro, frame);
     r1 = OPCODE_R1(taro, frame);
     r2 = OPCODE_R2(taro, frame);
-    frame->stack[rd] = frame->stack[r1] << frame->stack[r2];
+    CHECK_REGS_NO_ZERO(rd, r1, r2);
+    frame->regs[rd] = frame->regs[r1] << frame->regs[r2];
     frame->pc += 4;
     break;
   case SHR:
     rd = OPCODE_RD(taro, frame);
     r1 = OPCODE_R1(taro, frame);
     r2 = OPCODE_R2(taro, frame);
-    frame->stack[rd] = frame->stack[r1] >> frame->stack[r2];
+    CHECK_REGS_NO_ZERO(rd, r1, r2);
+    frame->regs[rd] = frame->regs[r1] >> frame->regs[r2];
     frame->pc += 4;
     break;
   case AND:
     rd = OPCODE_RD(taro, frame);
     r1 = OPCODE_R1(taro, frame);
     r2 = OPCODE_R2(taro, frame);
-    frame->stack[rd] = frame->stack[r1] & frame->stack[r2];
+    CHECK_REGS_NO_ZERO(rd, r1, r2);
+    frame->regs[rd] = frame->regs[r1] & frame->regs[r2];
     frame->pc += 4;
     break;
   case OR:
     rd = OPCODE_RD(taro, frame);
     r1 = OPCODE_R1(taro, frame);
     r2 = OPCODE_R2(taro, frame);
-    frame->stack[rd] = frame->stack[r1] | frame->stack[r2];
+    CHECK_REGS_NO_ZERO(rd, r1, r2);
+    frame->regs[rd] = frame->regs[r1] | frame->regs[r2];
     frame->pc += 4;
     break;
   case NOT:
     rd = OPCODE_RD(taro, frame);
     r1 = OPCODE_R1(taro, frame);
-    frame->stack[rd] = ~frame->stack[r1];
+    CHECK_REGS_NO_ZERO(rd, r1, 0);
+    frame->regs[rd] = ~frame->regs[r1];
     frame->pc += 3;
     break;
   case XOR:
     rd = OPCODE_RD(taro, frame);
     r1 = OPCODE_R1(taro, frame);
     r2 = OPCODE_R2(taro, frame);
-    frame->stack[rd] = frame->stack[r1] ^ frame->stack[r2];
+    CHECK_REGS_NO_ZERO(rd, r1, r2);
+    frame->regs[rd] = frame->regs[r1] ^ frame->regs[r2];
     frame->pc += 4;
     break;
   case MOD:
     rd = OPCODE_RD(taro, frame);
     r1 = OPCODE_R1(taro, frame);
     r2 = OPCODE_R2(taro, frame);
-    frame->stack[rd] = frame->stack[r1] % frame->stack[r2];
+    CHECK_REGS_NO_ZERO(rd, r1, r2);
+    frame->regs[rd] = frame->regs[r1] % frame->regs[r2];
     frame->pc += 4;
     break;
   case LD:
     rd = OPCODE_RD(taro, frame);
     r1 = OPCODE_R1(taro, frame);
     r2 = OPCODE_R1(taro, frame);
-    frame->stack[rd] = taro->mem.mem[frame->stack[r1] + frame->stack[r2]];
+    CHECK_REGS_NO_ZERO(rd, r1, r2);
+    frame->regs[rd] = taro->mem.mem[frame->regs[r1] + frame->regs[r2]];
     frame->pc += 4;
     break;
   case LDI:
     rd = OPCODE_RD(taro, frame);
+    CHECK_REGS_NO_ZERO(rd, 0, 0);
     frame->pc += 2;
     uint32_t imm = NEXT_WORD(taro, frame);
-    frame->stack[rd] = imm;
+    frame->regs[rd] = imm;
     frame->pc += 4;
     break;
   case ST:
     rd = OPCODE_RD(taro, frame);
     r1 = OPCODE_R1(taro, frame);
     r2 = OPCODE_R2(taro, frame);
-    taro->mem.mem[frame->stack[r1] + frame->stack[r2]] = frame->stack[rd];
+    CHECK_REGS_NO_ZERO(rd, r1, r2);
+    taro->mem.mem[frame->regs[r1] + frame->regs[r2]] = frame->regs[rd];
     frame->pc += 4;
     break;
   case MOV:
     rd = OPCODE_RD(taro, frame);
     r1 = OPCODE_R1(taro, frame);
-    frame->stack[rd] = frame->stack[r1];
+    CHECK_REGS_NO_ZERO(rd, r1, 0);
+    frame->regs[rd] = frame->regs[r1];
     frame->pc += 3;
     break;
   case PUSH:
     rd = OPCODE_RD(taro, frame);
     r1 = OPCODE_R1(taro, frame);
+    CHECK_REGS_NO_ZERO(rd, r1, 0);
     if (fp >= TARO_STACK_SIZE) {
       return TARO_ERROR_FRAME_OVERFLOW;
     }
-    next_frame->stack[rd] = frame->stack[r1];
+    next_frame->regs[rd] = frame->regs[r1];
     frame->pc += 3;
     break;
   case PULL:
     rd = OPCODE_RD(taro, frame);
     r1 = OPCODE_R1(taro, frame);
+    CHECK_REGS_NO_ZERO(rd, r1, 0);
     if (fp >= TARO_STACK_SIZE) {
       return TARO_ERROR_FRAME_OVERFLOW;
     }
-    frame->stack[rd] = next_frame->stack[r1];
+    frame->regs[rd] = next_frame->regs[r1];
     frame->pc += 3;
     break;
   case BRK:

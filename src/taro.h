@@ -3,13 +3,15 @@
 #include <stdint.h>
 
 #define TARO_STACK_SIZE 256
+#define TARO_MAX_REGISTERS (TARO_STACK_SIZE)
+#define TARO_ZERO_REG TARO_STACK_SIZE - 1
 #define TARO_MAX_MEM_SIZE (1 << 24);
 #define ALLOC_FUNC malloc
 #define DEALLOC_FUNC free
 
 typedef struct TaroFrame {
   uint32_t pc;
-  uint32_t stack[TARO_STACK_SIZE];
+  uint32_t regs[TARO_STACK_SIZE];
 } TaroFrame;
 
 typedef struct TaroMem {
@@ -34,6 +36,7 @@ typedef enum TaroReturnCode {
   TARO_ERROR_ALLOC,
   TARO_ERROR_MEM,
   TARO_ERROR_REG,
+  TARO_ERROR_ZERO_REG_WRITE,
   TARO_ERROR_BAD_OP,
   TARO_ERROR_NULL,
   TARO_ERROR_FRAME_OVERFLOW,

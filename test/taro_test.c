@@ -38,3 +38,48 @@ UTEST(taro, ld_add) {
   ASSERT_EQ(t.threads[0].frames[0].stack[1], 1);
   ASSERT_EQ(t.threads[0].frames[0].stack[2], 2);
 }
+
+UTEST(taro, ld_sub) {
+  uint8_t mem[] = {
+      LDI,  0x00, 0x03, 0x00, 0x00, 0x00, LDI,  0x01, 0x04,
+      0x00, 0x00, 0x00, SUB,  0x02, 0x00, 0x01, BRK,
+  };
+  TaroReturn tr = taro_new(sizeof(mem));
+  Taro t = tr.taro;
+  TaroReturnCode rc = taro_load(&t, mem, sizeof(mem));
+  ASSERT_EQ(rc, TARO_OK);
+  ASSERT_EQ(taro_run(&t), TARO_BRK);
+  ASSERT_EQ(t.threads[0].frames[0].stack[0], 3);
+  ASSERT_EQ(t.threads[0].frames[0].stack[1], 4);
+  ASSERT_EQ(t.threads[0].frames[0].stack[2], -1);
+}
+
+UTEST(taro, ld_mul) {
+  uint8_t mem[] = {
+      LDI,  0x00, 0x03, 0x00, 0x00, 0x00, LDI,  0x01, 0x04,
+      0x00, 0x00, 0x00, MUL,  0x02, 0x00, 0x01, BRK,
+  };
+  TaroReturn tr = taro_new(sizeof(mem));
+  Taro t = tr.taro;
+  TaroReturnCode rc = taro_load(&t, mem, sizeof(mem));
+  ASSERT_EQ(rc, TARO_OK);
+  ASSERT_EQ(taro_run(&t), TARO_BRK);
+  ASSERT_EQ(t.threads[0].frames[0].stack[0], 3);
+  ASSERT_EQ(t.threads[0].frames[0].stack[1], 4);
+  ASSERT_EQ(t.threads[0].frames[0].stack[2], 12);
+}
+
+UTEST(taro, ld_div) {
+  uint8_t mem[] = {
+      LDI,  0x00, 0x0a, 0x00, 0x00, 0x00, LDI,  0x01, 0x05,
+      0x00, 0x00, 0x00, DIV,  0x02, 0x00, 0x01, BRK,
+  };
+  TaroReturn tr = taro_new(sizeof(mem));
+  Taro t = tr.taro;
+  TaroReturnCode rc = taro_load(&t, mem, sizeof(mem));
+  ASSERT_EQ(rc, TARO_OK);
+  ASSERT_EQ(taro_run(&t), TARO_BRK);
+  ASSERT_EQ(t.threads[0].frames[0].stack[0], 10);
+  ASSERT_EQ(t.threads[0].frames[0].stack[1], 5);
+  ASSERT_EQ(t.threads[0].frames[0].stack[2], 2);
+}

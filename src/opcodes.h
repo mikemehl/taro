@@ -1,12 +1,9 @@
 #ifndef __OPCODES_H__
 #define __OPCODES_H__
 
-#define OPCODE_OP(a) ((a & (0xFF << 24)) >> 24)
-#define OPCODE_RD(a) ((a & (0xFF << 16)) >> 16)
-#define OPCODE_R1(a) ((a & (0xFF << 8)) >> 8)
-#define OPCODE_R2(a) (a & (0xFF))
-
 typedef enum TaroOpcode {
+  // nop
+  NOP,
   // math
   ADD,
   SUB,

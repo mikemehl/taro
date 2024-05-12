@@ -16,7 +16,7 @@ TEST_OBJS := $(TEST_SRCS:%=$(BUILD_DIR)/%.o) $(TARO_OBJS)
 TEST_DEPS := $(TEST_OBJS:%.o=%.d) $(TARO_DEPS)
 
 INC_FLAGS := $(INC_DIRS:%=-I%)
-CFLAGS := $(CFLAGS) -Wall -Werror -MMD -MP
+CFLAGS := $(CFLAGS) -Wall -Werror -MMD -MP -g
 
 $(TARO_TEST): $(TARO_LIB) $(TEST_OBJS)
 	$(CC) -o $@ $(CFLAGS) $(INC_FLAGS) $(LDFLAGS) $^

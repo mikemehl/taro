@@ -1,4 +1,5 @@
 #include "taro.h"
+#include <stdio.h>
 #if ALLOC_FUNC == malloc
 #include <stdlib.h>
 #endif
@@ -9,7 +10,6 @@
 TaroFrame taro_frame_new() {
   TaroFrame f;
   f.pc = 0;
-  f.sp = 0;
   return f;
 }
 
@@ -20,6 +20,7 @@ typedef struct TaroMemReturn {
 
 TaroMemReturn taro_mem_new(uint32_t const size) {
   TaroMemReturn r;
+  r.rc = TARO_OK;
   r.mem.mem_size = size;
   r.mem.mem = (uint8_t *)ALLOC_FUNC(size);
   if (r.mem.mem == NULL) {
@@ -75,27 +76,38 @@ TaroReturnCode taro_load(Taro *const taro, uint8_t *mem, uint32_t mem_size) {
   } while (0)
 
 #define NEXT_WORD(taro, frame) (*(uint32_t *)(&taro->mem.mem[frame->pc]))
+#define NEXT_OP(taro, frame) ((taro->mem.mem[frame->pc]))
+#define OPCODE_RD(taro, frame) ((taro->mem.mem[frame->pc + 1]))
+#define OPCODE_R1(taro, frame) ((taro->mem.mem[frame->pc + 2]))
+#define OPCODE_R2(taro, frame) ((taro->mem.mem[frame->pc + 3]))
+#define CURR_FRAME(thread_num, taro)                                           \
+  &taro->threads[thread_num].frames[taro->threads[thread_num].fp]
 
 static TaroReturnCode taro_frame_step(TaroFrame *const frame,
                                       Taro *const taro) {
-  uint32_t next_word = NEXT_WORD(taro, frame);
-  TaroOpcode op = OPCODE_OP(next_word);
-  uint32_t rd = OPCODE_RD(next_word);
-  uint32_t r1 = OPCODE_R1(next_word);
-  uint32_t r2 = OPCODE_R2(next_word);
+  TaroOpcode op = NEXT_OP(taro, frame);
+  uint32_t rd, r1, r2 = 0;
   switch (op) {
   case ADD:
-    CHECK_REGS(rd, r1, r2);
+    rd = OPCODE_RD(taro, frame);
+    r1 = OPCODE_R1(taro, frame);
+    r2 = OPCODE_R2(taro, frame);
     frame->stack[rd] = frame->stack[r1] + frame->stack[r2];
+    frame->pc += 4;
+    break;
   case LDI:
+    rd = OPCODE_RD(taro, frame);
     frame->pc += 2;
     uint32_t imm = NEXT_WORD(taro, frame);
     frame->stack[rd] = imm;
+    frame->pc += 4;
+    break;
+  case BRK:
+    return TARO_BRK;
   case INVALID:
   default:
     return TARO_ERROR;
   }
-  frame->pc += 4;
   return TARO_OK;
 }
 
@@ -105,9 +117,9 @@ TaroReturnCode taro_run(Taro *const taro) {
   }
 
   while (1) {
-    if (taro_frame_step(&taro->threads[0].frames[taro->threads[0].fp], taro) !=
-        TARO_OK) {
-      return TARO_ERROR;
+    TaroReturnCode rc = taro_frame_step(CURR_FRAME(0, taro), taro);
+    if (rc != TARO_OK) {
+      return rc;
     }
   }
 

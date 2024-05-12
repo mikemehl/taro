@@ -24,7 +24,7 @@ TaroMemReturn taro_mem_new(uint32_t const size) {
   r.mem.mem_size = size;
   r.mem.mem = (uint8_t *)ALLOC_FUNC(size);
   if (r.mem.mem == NULL) {
-    r.rc = TARO_ERROR;
+    r.rc = TARO_ERROR_ALLOC;
   }
   return r;
 }
@@ -41,7 +41,7 @@ TaroReturn taro_new(uint32_t const mem_size) {
 
   r.taro.threads = ALLOC_FUNC(sizeof(TaroThread));
   if (r.taro.threads == NULL) {
-    r.rc = TARO_ERROR;
+    r.rc = TARO_ERROR_ALLOC;
     return r;
   }
   r.taro.num_threads = 1;
@@ -60,7 +60,7 @@ TaroReturn taro_new(uint32_t const mem_size) {
 
 TaroReturnCode taro_load(Taro *const taro, uint8_t *mem, uint32_t mem_size) {
   if (mem == NULL || mem_size > taro->mem.mem_size) {
-    return TARO_ERROR;
+    return TARO_ERROR_MEM;
   }
 
   memcpy(taro->mem.mem, mem, mem_size);
@@ -71,7 +71,7 @@ TaroReturnCode taro_load(Taro *const taro, uint8_t *mem, uint32_t mem_size) {
 #define CHECK_REGS(rd, r1, r2)                                                 \
   do {                                                                         \
     if (rd > frame->sp || r1 > frame->sp || r2 > frame->sp) {                  \
-      return TARO_ERROR;                                                       \
+      return TARO_ERROR_REG;                                                   \
     }                                                                          \
   } while (0)
 
@@ -141,14 +141,14 @@ static TaroReturnCode taro_frame_step(TaroFrame *const frame,
     return TARO_BRK;
   case INVALID:
   default:
-    return TARO_ERROR;
+    return TARO_ERROR_BAD_OP;
   }
   return TARO_OK;
 }
 
 TaroReturnCode taro_run(Taro *const taro) {
   if (taro == NULL) {
-    return TARO_ERROR;
+    return TARO_ERROR_NULL;
   }
 
   while (1) {

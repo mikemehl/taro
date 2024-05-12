@@ -29,9 +29,14 @@ typedef struct Taro {
 } Taro;
 
 typedef enum TaroReturnCode {
-  TARO_OK = 0,
-  TARO_ERROR = 1,
-  TARO_BRK = 2,
+  TARO_OK,
+  TARO_BRK,
+  TARO_ERROR_ALLOC,
+  TARO_ERROR_MEM,
+  TARO_ERROR_REG,
+  TARO_ERROR_BAD_OP,
+  TARO_ERROR_NULL,
+  TARO_ERROR,
 } TaroReturnCode;
 
 typedef struct TaroReturn {

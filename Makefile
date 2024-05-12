@@ -26,7 +26,7 @@ $(TARO_LIB): $(TARO_OBJS)
 
 $(BUILD_DIR)/%.c.o: %.c
 	-mkdir -p $(dir $@)
-	$(CC) -c -o $@ $(CFLAGS) $(INC_FLAGS) $(LDFLAGS) $^ 
+	$(CC) -c -o $@ $(CFLAGS) $(INC_FLAGS) $(LDFLAGS) $< 
 
 .PHONY: clean
 clean:

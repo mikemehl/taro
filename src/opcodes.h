@@ -16,10 +16,10 @@ typedef enum TaroOpcode {
   NOT,
   XOR,
   MOD,
-  ADDF,
-  SUBF,
-  MULF,
-  DIVF,
+  /* ADDF, */
+  /* SUBF, */
+  /* MULF, */
+  /* DIVF, */
   // memory & registers
   LD,
   LDI,

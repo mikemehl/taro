@@ -87,6 +87,8 @@ static TaroReturnCode taro_frame_step(TaroFrame *const frame,
                                       Taro *const taro) {
   TaroOpcode op = NEXT_OP(taro, frame);
   uint32_t rd, r1, r2 = 0;
+  uint32_t fp = taro->threads[0].fp;
+  TaroFrame *const next_frame = &taro->threads[0].frames[fp + 1];
   switch (op) {
   case ADD:
     rd = OPCODE_RD(taro, frame);
@@ -130,12 +132,84 @@ static TaroReturnCode taro_frame_step(TaroFrame *const frame,
     frame->stack[rd] = frame->stack[r1] >> frame->stack[r2];
     frame->pc += 4;
     break;
+  case AND:
+    rd = OPCODE_RD(taro, frame);
+    r1 = OPCODE_R1(taro, frame);
+    r2 = OPCODE_R2(taro, frame);
+    frame->stack[rd] = frame->stack[r1] & frame->stack[r2];
+    frame->pc += 4;
+    break;
+  case OR:
+    rd = OPCODE_RD(taro, frame);
+    r1 = OPCODE_R1(taro, frame);
+    r2 = OPCODE_R2(taro, frame);
+    frame->stack[rd] = frame->stack[r1] | frame->stack[r2];
+    frame->pc += 4;
+    break;
+  case NOT:
+    rd = OPCODE_RD(taro, frame);
+    r1 = OPCODE_R1(taro, frame);
+    frame->stack[rd] = ~frame->stack[r1];
+    frame->pc += 3;
+    break;
+  case XOR:
+    rd = OPCODE_RD(taro, frame);
+    r1 = OPCODE_R1(taro, frame);
+    r2 = OPCODE_R2(taro, frame);
+    frame->stack[rd] = frame->stack[r1] ^ frame->stack[r2];
+    frame->pc += 4;
+    break;
+  case MOD:
+    rd = OPCODE_RD(taro, frame);
+    r1 = OPCODE_R1(taro, frame);
+    r2 = OPCODE_R2(taro, frame);
+    frame->stack[rd] = frame->stack[r1] % frame->stack[r2];
+    frame->pc += 4;
+    break;
+  case LD:
+    rd = OPCODE_RD(taro, frame);
+    r1 = OPCODE_R1(taro, frame);
+    r2 = OPCODE_R1(taro, frame);
+    frame->stack[rd] = taro->mem.mem[frame->stack[r1] + frame->stack[r2]];
+    frame->pc += 4;
+    break;
   case LDI:
     rd = OPCODE_RD(taro, frame);
     frame->pc += 2;
     uint32_t imm = NEXT_WORD(taro, frame);
     frame->stack[rd] = imm;
     frame->pc += 4;
+    break;
+  case ST:
+    rd = OPCODE_RD(taro, frame);
+    r1 = OPCODE_R1(taro, frame);
+    r2 = OPCODE_R2(taro, frame);
+    taro->mem.mem[frame->stack[r1] + frame->stack[r2]] = frame->stack[rd];
+    frame->pc += 4;
+    break;
+  case MOV:
+    rd = OPCODE_RD(taro, frame);
+    r1 = OPCODE_R1(taro, frame);
+    frame->stack[rd] = frame->stack[r1];
+    frame->pc += 3;
+    break;
+  case PUSH:
+    rd = OPCODE_RD(taro, frame);
+    r1 = OPCODE_R1(taro, frame);
+    if (fp >= TARO_STACK_SIZE) {
+      return TARO_ERROR_FRAME_OVERFLOW;
+    }
+    next_frame->stack[rd] = frame->stack[r1];
+    frame->pc += 3;
+    break;
+  case PULL:
+    rd = OPCODE_RD(taro, frame);
+    r1 = OPCODE_R1(taro, frame);
+    if (fp >= TARO_STACK_SIZE) {
+      return TARO_ERROR_FRAME_OVERFLOW;
+    }
+    frame->stack[rd] = next_frame->stack[r1];
+    frame->pc += 3;
     break;
   case BRK:
     return TARO_BRK;

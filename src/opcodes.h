@@ -3,9 +3,10 @@
 
 typedef enum TaroOpcode {
   // nop
-  NOP,
+  NOP = 0x00,
+
   // math
-  ADD,
+  ADD = 0x10,
   SUB,
   MUL,
   DIV,
@@ -20,30 +21,33 @@ typedef enum TaroOpcode {
   /* SUBF, */
   /* MULF, */
   /* DIVF, */
+
   // memory & registers
-  LD,
+  LD = 0x20,
   LDI,
   ST,
   MOV,
   PUSH, // push to next frame to be called
   PULL, // pull from next frame to be called
+
   // control flow
-  JMP,
+  JMP = 0x30,
   JCN,
   CALL,
   RET,
   INT,
   BRK,
+
   // threading
-  THRD,
+  THRD = 0x40,
   SEND,
   JOIN,
   STOP,
   // i/o
-  IN,
+  IN = 0x50,
   OUT,
   // debug
-  DBG,
+  DBG = 0x60,
   // MAX
   MAX_OPCODES,
   INVALID = MAX_OPCODES

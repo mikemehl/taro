@@ -45,4 +45,8 @@ test-rand: $(TARO_TEST)
 bear: clean
 	bear -- $(MAKE) $(TARO_TEST)
 
+.PHONY: valgrind
+valgrind: test
+	valgrind $(TARO_TEST)
+
 -include $(TARO_DEPS) $(TEST_DEPS)

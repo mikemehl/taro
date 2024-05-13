@@ -237,6 +237,12 @@ static TaroReturnCode taro_frame_step(TaroFrame *const frame,
     frame->regs[rd] = next_frame->regs[r1];
     frame->pc += 3;
     break;
+  case JMP:
+    rd = OPCODE_RD(taro, frame);
+    r1 = OPCODE_R1(taro, frame);
+    CHECK_REGS_NO_ZERO(rd, r1, 0);
+    frame->pc = frame->regs[rd] + frame->regs[r1];
+    break;
   case BRK:
     return TARO_BRK;
   case INVALID:

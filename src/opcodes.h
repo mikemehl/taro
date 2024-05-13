@@ -32,8 +32,11 @@ typedef enum TaroOpcode {
 
   // control flow
   JMP = 0x30,
+  JMPI,
   JCN,
+  JCNI,
   CALL,
+  CALLI,
   RET,
   INT,
   BRK,

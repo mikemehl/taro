@@ -53,4 +53,5 @@ TaroReturn taro_new(uint32_t const mem_size);
 TaroReturnCode taro_load(Taro *const taro, uint8_t *mem, uint32_t mem_size);
 TaroReturnCode taro_run(Taro *const taro);
 void taro_reset(Taro *const taro);
+void taro_free();
 #endif /* ifndef __TARO_H__ */

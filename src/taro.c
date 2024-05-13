@@ -7,10 +7,28 @@
 #include "opcodes.h"
 #include <memory.h>
 
-TaroFrame taro_frame_new() {
-  TaroFrame f;
-  f.pc = 0;
-  return f;
+static void *allocs[TARO_STACK_SIZE] = {0};
+
+static void *taro_alloc(size_t size) {
+  void **next_slot = &allocs[0];
+  while (*next_slot != NULL && next_slot < (&allocs[TARO_STACK_SIZE])) {
+    next_slot++;
+  }
+  if (next_slot >= &allocs[TARO_STACK_SIZE]) {
+    return NULL;
+  }
+  void *mem = ALLOC_FUNC(size);
+  *next_slot = mem;
+  return mem;
+}
+
+static void taro_dealloc() {
+  void **next_slot = &allocs[0];
+  while (next_slot != NULL && next_slot < (&allocs[TARO_STACK_SIZE])) {
+    DEALLOC_FUNC(*next_slot);
+    *next_slot = NULL;
+    next_slot++;
+  }
 }
 
 typedef struct TaroMemReturn {
@@ -22,16 +40,21 @@ TaroMemReturn taro_mem_new(uint32_t const size) {
   TaroMemReturn r;
   r.rc = TARO_OK;
   r.mem.mem_size = size;
-  r.mem.mem = (uint8_t *)ALLOC_FUNC(size);
+  r.mem.mem = (uint8_t *)taro_alloc(size);
   if (r.mem.mem == NULL) {
     r.rc = TARO_ERROR_ALLOC;
   }
+  memset(r.mem.mem, 0, size);
   return r;
 }
 
 TaroThread taro_thread_new() {
   TaroThread t;
   t.fp = 0;
+  for (size_t i = 0; i < TARO_STACK_SIZE; i++) {
+    t.frames[i].pc = TARO_EXEC_START;
+    memset(&t.frames[i].regs[0], 0, TARO_STACK_SIZE * sizeof(uint32_t));
+  }
   return t;
 }
 
@@ -39,7 +62,7 @@ TaroReturn taro_new(uint32_t const mem_size) {
   TaroReturn r;
   r.rc = TARO_OK;
 
-  r.taro.threads = ALLOC_FUNC(sizeof(TaroThread));
+  r.taro.threads = taro_alloc(sizeof(TaroThread));
   if (r.taro.threads == NULL) {
     r.rc = TARO_ERROR_ALLOC;
     return r;
@@ -89,7 +112,7 @@ void taro_reset(Taro *const taro) {
     }                                                                          \
   } while (0)
 
-#define NEXT_WORD(taro, frame) (*(uint32_t *)(&taro->mem.mem[frame->pc]))
+#define NEXT_WORD(taro, frame) (*(uint32_t *)(&(taro->mem.mem[frame->pc])))
 #define NEXT_OP(taro, frame) ((taro->mem.mem[frame->pc]))
 #define OPCODE_RD(taro, frame) ((taro->mem.mem[frame->pc + 1]))
 #define OPCODE_R1(taro, frame) ((taro->mem.mem[frame->pc + 2]))
@@ -100,7 +123,7 @@ void taro_reset(Taro *const taro) {
 static TaroReturnCode taro_frame_step(TaroFrame *const frame,
                                       Taro *const taro) {
   TaroOpcode op = NEXT_OP(taro, frame);
-  uint32_t rd, r1, r2 = 0;
+  uint32_t rd, r1, r2, offset = 0;
   uint32_t fp = taro->threads[0].fp;
   uint32_t imm = 0;
   TaroFrame *const next_frame = &taro->threads[0].frames[fp + 1];
@@ -197,7 +220,11 @@ static TaroReturnCode taro_frame_step(TaroFrame *const frame,
     r1 = OPCODE_R1(taro, frame);
     r2 = OPCODE_R1(taro, frame);
     CHECK_REGS_NO_ZERO(rd, r1, r2);
-    frame->regs[rd] = taro->mem.mem[frame->regs[r1] + frame->regs[r2]];
+    offset = frame->regs[r1] + frame->regs[r2];
+    if (offset >= taro->mem.mem_size) {
+      return TARO_ERROR_MEM;
+    }
+    frame->regs[rd] = taro->mem.mem[offset];
     frame->pc += 4;
     break;
   case LDI:
@@ -213,7 +240,11 @@ static TaroReturnCode taro_frame_step(TaroFrame *const frame,
     r1 = OPCODE_R1(taro, frame);
     r2 = OPCODE_R2(taro, frame);
     CHECK_REGS_NO_ZERO(rd, r1, r2);
-    taro->mem.mem[frame->regs[r1] + frame->regs[r2]] = frame->regs[rd];
+    offset = frame->regs[r1] + frame->regs[r2];
+    if (offset >= taro->mem.mem_size) {
+      return TARO_ERROR_MEM;
+    }
+    taro->mem.mem[offset] = frame->regs[rd];
     frame->pc += 4;
     break;
   case MOV:
@@ -288,3 +319,5 @@ TaroReturnCode taro_run(Taro *const taro) {
 
   return TARO_OK;
 }
+
+void taro_free() { taro_dealloc(); }

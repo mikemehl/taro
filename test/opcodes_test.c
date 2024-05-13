@@ -2,7 +2,12 @@
 #include "taro.h"
 #include "utest.h"
 
-UTEST(opcodes, ld) {
+struct opcodes {};
+
+UTEST_F_SETUP(opcodes) {}
+UTEST_F_TEARDOWN(opcodes) { taro_free(); }
+
+UTEST_F(opcodes, ld) {
   uint8_t mem[] = {
       LDI,  0x00, 0x01, 0x00, 0x00, 0x00, LDI,  0x01, 0x01,
       0x00, 0x00, 0x00, LD,   0x02, 0x00, 0x01, BRK,
@@ -17,12 +22,12 @@ UTEST(opcodes, ld) {
   ASSERT_EQ(t.threads[0].frames[0].regs[2], (*(uint32_t *)(&mem[2])));
 }
 
-UTEST(opcodes, st) {
+UTEST_F(opcodes, st) {
   uint8_t mem[] = {
       LDI, 0x00, 0x01, 0x00, 0x00, 0x00, LDI, 0x01, 0x47, 0x00, 0x00, 0x00,
       LDI, 0x02, 0xFF, 0x00, 0x00, 0x00, ST,  0x02, 0x00, 0x01, BRK,
   };
-  TaroReturn tr = taro_new(sizeof(mem));
+  TaroReturn tr = taro_new(sizeof(mem) + 0x1000);
   Taro t = tr.taro;
   TaroReturnCode rc = taro_load(&t, mem, sizeof(mem));
   ASSERT_EQ(rc, TARO_OK);
@@ -33,7 +38,7 @@ UTEST(opcodes, st) {
   ASSERT_EQ(t.mem.mem[0x47 + 1], 0xFF);
 }
 
-UTEST(opcodes, mov) {
+UTEST_F(opcodes, mov) {
   uint8_t mem[] = {
       LDI,  0x00, 0x01, 0x00, 0x00, 0x00, LDI,  0x01, 0x47, 0x00, 0x00,
       0x00, LDI,  0x02, 0xFF, 0x00, 0x00, 0x00, MOV,  0x02, 0x00, BRK,
@@ -48,7 +53,7 @@ UTEST(opcodes, mov) {
   ASSERT_EQ(t.threads[0].frames[0].regs[2], 0x01);
 }
 
-UTEST(opcodes, push) {
+UTEST_F(opcodes, push) {
   uint8_t mem[] = {
       LDI,  0x00, 0x78, 0x00, 0x00, 0x00, LDI,  0x01, 0x47, 0x00, 0x00,
       0x00, LDI,  0x02, 0xFF, 0x00, 0x00, 0x00, PUSH, 0x01, 0x00, BRK,
@@ -64,7 +69,7 @@ UTEST(opcodes, push) {
   ASSERT_EQ(t.threads[0].frames[1].regs[1], 0x78);
 }
 
-UTEST(opcodes, pull) {
+UTEST_F(opcodes, pull) {
   uint8_t mem[] = {
       LDI,  0x00, 0x78, 0x00, 0x00, 0x00, LDI,  0x01, 0x47, 0x00, 0x00,
       0x00, LDI,  0x02, 0xFF, 0x00, 0x00, 0x00, PULL, 0x01, 0x00, BRK,
@@ -80,7 +85,7 @@ UTEST(opcodes, pull) {
   ASSERT_EQ(t.threads[0].frames[0].regs[2], 0xFF);
 }
 
-UTEST(opcodes, add) {
+UTEST_F(opcodes, add) {
   uint8_t mem[] = {
       LDI,  0x00, 0x01, 0x00, 0x00, 0x00, LDI,  0x01, 0x01,
       0x00, 0x00, 0x00, ADD,  0x02, 0x00, 0x01, BRK,
@@ -95,7 +100,7 @@ UTEST(opcodes, add) {
   ASSERT_EQ(t.threads[0].frames[0].regs[2], 2);
 }
 
-UTEST(opcodes, sub) {
+UTEST_F(opcodes, sub) {
   uint8_t mem[] = {
       LDI,  0x00, 0x03, 0x00, 0x00, 0x00, LDI,  0x01, 0x04,
       0x00, 0x00, 0x00, SUB,  0x02, 0x00, 0x01, BRK,
@@ -110,7 +115,7 @@ UTEST(opcodes, sub) {
   ASSERT_EQ(t.threads[0].frames[0].regs[2], -1);
 }
 
-UTEST(opcodes, mul) {
+UTEST_F(opcodes, mul) {
   uint8_t mem[] = {
       LDI,  0x00, 0x03, 0x00, 0x00, 0x00, LDI,  0x01, 0x04,
       0x00, 0x00, 0x00, MUL,  0x02, 0x00, 0x01, BRK,
@@ -125,7 +130,7 @@ UTEST(opcodes, mul) {
   ASSERT_EQ(t.threads[0].frames[0].regs[2], 12);
 }
 
-UTEST(opcodes, div) {
+UTEST_F(opcodes, div) {
   uint8_t mem[] = {
       LDI,  0x00, 0x0a, 0x00, 0x00, 0x00, LDI,  0x01, 0x05,
       0x00, 0x00, 0x00, DIV,  0x02, 0x00, 0x01, BRK,
@@ -140,7 +145,7 @@ UTEST(opcodes, div) {
   ASSERT_EQ(t.threads[0].frames[0].regs[2], 2);
 }
 
-UTEST(opcodes, shl) {
+UTEST_F(opcodes, shl) {
   uint8_t mem[] = {
       LDI,  0x00, 0x01, 0x00, 0x00, 0x00, LDI,  0x01, 0x05,
       0x00, 0x00, 0x00, SHL,  0x02, 0x00, 0x01, BRK,
@@ -155,7 +160,7 @@ UTEST(opcodes, shl) {
   ASSERT_EQ(t.threads[0].frames[0].regs[2], (1 << 5));
 }
 
-UTEST(opcodes, shr) {
+UTEST_F(opcodes, shr) {
   uint8_t mem[] = {
       LDI,  0x00, 0x10, 0x00, 0x00, 0x00, LDI,  0x01, 0x04,
       0x00, 0x00, 0x00, SHR,  0x02, 0x00, 0x01, BRK,
@@ -170,7 +175,7 @@ UTEST(opcodes, shr) {
   ASSERT_EQ(t.threads[0].frames[0].regs[2], (0x10 >> 4));
 }
 
-UTEST(opcodes, and) {
+UTEST_F(opcodes, and) {
   uint8_t mem[] = {
       LDI,  0x00, 0x12, 0x00, 0x00, 0x00, LDI,  0x01, 0x02,
       0x00, 0x00, 0x00, AND,  0x02, 0x00, 0x01, BRK,
@@ -185,7 +190,7 @@ UTEST(opcodes, and) {
   ASSERT_EQ(t.threads[0].frames[0].regs[2], 0x02);
 }
 
-UTEST(opcodes, or) {
+UTEST_F(opcodes, or) {
   uint8_t mem[] = {
       LDI,  0x00, 0x10, 0x00, 0x00, 0x00, LDI,  0x01, 0x0F,
       0x00, 0x00, 0x00, OR,   0x02, 0x00, 0x01, BRK,
@@ -200,7 +205,7 @@ UTEST(opcodes, or) {
   ASSERT_EQ(t.threads[0].frames[0].regs[2], 0x1F);
 }
 
-UTEST(opcodes, not ) {
+UTEST_F(opcodes, not ) {
   uint8_t mem[] = {
       LDI, 0x00, 0x10, 0x00, 0x00, 0x00, NOT, 0x02, 0x00, BRK,
   };
@@ -213,7 +218,7 @@ UTEST(opcodes, not ) {
   ASSERT_EQ(t.threads[0].frames[0].regs[2], ~0x10);
 }
 
-UTEST(opcodes, xor) {
+UTEST_F(opcodes, xor) {
   uint8_t mem[] = {
       LDI,  0x00, 0x10, 0x00, 0x00, 0x00, LDI,  0x01, 0x0F,
       0x00, 0x00, 0x00, XOR,  0x02, 0x00, 0x01, BRK,
@@ -228,7 +233,7 @@ UTEST(opcodes, xor) {
   ASSERT_EQ(t.threads[0].frames[0].regs[2], (0x10 ^ 0x0F));
 }
 
-UTEST(opcodes, mod) {
+UTEST_F(opcodes, mod) {
   uint8_t mem[] = {
       LDI,  0x00, 0x10, 0x00, 0x00, 0x00, LDI,  0x01, 0x0F,
       0x00, 0x00, 0x00, MOD,  0x02, 0x00, 0x01, BRK,
@@ -243,7 +248,7 @@ UTEST(opcodes, mod) {
   ASSERT_EQ(t.threads[0].frames[0].regs[2], (0x10 % 0x0F));
 }
 
-UTEST(opcodes, jmp) {
+UTEST_F(opcodes, jmp) {
   uint8_t mem[] = {LDI,  0x00, 0x06, 0x00, 0x00, 0x00, LDI,  0x01,
                    0x0a, 0x00, 0x00, 0x00, JMP,  0x00, 0x01, BRK,
                    LDI,  0x02, 0xFF, 0xFF, 0xFF, 0xFF, BRK};
@@ -258,7 +263,7 @@ UTEST(opcodes, jmp) {
   ASSERT_EQ(t.threads[0].frames[0].regs[2], 0xFFFFFFFF);
 }
 
-UTEST(opcodes, jmpi) {
+UTEST_F(opcodes, jmpi) {
   uint8_t mem[] = {LDI,  0x00, 0x06, 0x00, 0x00, 0x00, LDI,  0x01, 0x0a,
                    0x00, 0x00, 0x00, JMPI, 0x12, 0x00, 0x00, 0x00, BRK,
                    LDI,  0x02, 0xFF, 0xFF, 0xFF, 0xFF, BRK};
@@ -273,7 +278,7 @@ UTEST(opcodes, jmpi) {
   ASSERT_EQ(t.threads[0].frames[0].regs[2], 0xFFFFFFFF);
 }
 
-UTEST(opcodes, jcn) {
+UTEST_F(opcodes, jcn) {
   uint8_t mem[] = {LDI,  0x00, 0x07, 0x00, 0x00, 0x00, LDI,  0x01, 0x10, 0x00,
                    0x00, 0x00, LDI,  0x02, 0x0b, 0x00, 0x00, 0x00, JCN,  0x00,
                    0x01, 0x02, BRK,  LDI,  0x02, 0xFF, 0xFF, 0xFF, 0xFF, BRK};

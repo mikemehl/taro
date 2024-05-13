@@ -41,6 +41,7 @@ typedef enum TaroReturnCode {
   TARO_ERROR_BAD_OP,
   TARO_ERROR_NULL,
   TARO_ERROR_FRAME_OVERFLOW,
+  TARO_ERROR_FRAME_UNDERFLOW,
   TARO_ERROR,
 } TaroReturnCode;
 

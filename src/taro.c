@@ -308,6 +308,22 @@ static TaroReturnCode taro_frame_step(TaroFrame *const frame,
       frame->pc += 4;
     }
     break;
+  case CALL:
+    rd = OPCODE_RD(taro, frame);
+    CHECK_REGS(rd, 0, 0);
+    taro->threads[0].fp += 1;
+    if (taro->threads[0].fp >= TARO_STACK_SIZE) {
+      return TARO_ERROR_FRAME_OVERFLOW;
+    }
+    taro->threads[0].frames[taro->threads[0].fp].pc = frame->regs[rd];
+    frame->pc += 2;
+    break;
+  case RET:
+    if (taro->threads[0].fp <= 0) {
+      return TARO_ERROR_FRAME_UNDERFLOW;
+    }
+    taro->threads[0].fp -= 1;
+    break;
   case BRK:
     return TARO_BRK;
   case INVALID:

@@ -43,6 +43,7 @@ TaroMemReturn taro_mem_new(uint32_t const size) {
   r.mem.mem = (uint8_t *)taro_alloc(size);
   if (r.mem.mem == NULL) {
     r.rc = TARO_ERROR_ALLOC;
+    return r;
   }
   memset(r.mem.mem, 0, size);
   return r;

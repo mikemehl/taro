@@ -16,7 +16,7 @@ TEST_OBJS := $(TEST_SRCS:%=$(BUILD_DIR)/%.o) $(TARO_OBJS)
 TEST_DEPS := $(TEST_OBJS:%.o=%.d) $(TARO_DEPS)
 
 INC_FLAGS := $(INC_DIRS:%=-I%)
-CFLAGS := $(CFLAGS) -Wall -Werror -MMD -MP -g
+CFLAGS := $(CFLAGS) -Wall -Werror -MMD -MP -g -std=c11 
 
 $(TARO_TEST): $(TARO_LIB) $(TEST_OBJS)
 	$(CC) -o $@ $(CFLAGS) $(INC_FLAGS) $(LDFLAGS) $^
@@ -32,6 +32,14 @@ $(BUILD_DIR)/%.c.o: %.c
 clean:
 	rm -rf $(BUILD_DIR)
 
+.PHONY: bear
+bear: clean
+	bear -- $(MAKE) $(TARO_TEST)
+
+.PHONY: lint
+lint: 
+	clang-tidy $(TARO_SRCS)
+
 .PHONY: test
 test: $(TARO_TEST)
 	$(TARO_TEST) $(TEST_ARGS)
@@ -41,12 +49,8 @@ TEST_ARGS := --random-order
 test-rand: $(TARO_TEST)
 	$(MAKE) test
 
-.PHONY: bear
-bear: clean
-	bear -- $(MAKE) $(TARO_TEST)
-
 .PHONY: check
-check: $(TARO_TEST)
+check: $(TARO_TEST) lint
 	valgrind --leak-check=full --track-origins=yes $(TARO_TEST) 
 
 -include $(TARO_DEPS) $(TEST_DEPS)

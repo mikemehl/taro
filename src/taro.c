@@ -97,6 +97,7 @@ static TaroReturnCode taro_frame_step(TaroFrame *const frame,
   TaroOpcode op = NEXT_OP(taro, frame);
   uint32_t rd, r1, r2 = 0;
   uint32_t fp = taro->threads[0].fp;
+  uint32_t imm = 0;
   TaroFrame *const next_frame = &taro->threads[0].frames[fp + 1];
   switch (op) {
   case ADD:
@@ -198,7 +199,7 @@ static TaroReturnCode taro_frame_step(TaroFrame *const frame,
     rd = OPCODE_RD(taro, frame);
     CHECK_REGS_NO_ZERO(rd, 0, 0);
     frame->pc += 2;
-    uint32_t imm = NEXT_WORD(taro, frame);
+    imm = NEXT_WORD(taro, frame);
     frame->regs[rd] = imm;
     frame->pc += 4;
     break;
@@ -240,8 +241,13 @@ static TaroReturnCode taro_frame_step(TaroFrame *const frame,
   case JMP:
     rd = OPCODE_RD(taro, frame);
     r1 = OPCODE_R1(taro, frame);
-    CHECK_REGS_NO_ZERO(rd, r1, 0);
+    CHECK_REGS(rd, r1, 0);
     frame->pc = frame->regs[rd] + frame->regs[r1];
+    break;
+  case JMPI:
+    frame->pc += 1;
+    imm = NEXT_WORD(taro, frame);
+    frame->pc = imm;
     break;
   case BRK:
     return TARO_BRK;

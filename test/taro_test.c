@@ -279,3 +279,18 @@ UTEST(taro, jmp) {
   ASSERT_EQ(t.threads[0].frames[0].regs[1], 10);
   ASSERT_EQ(t.threads[0].frames[0].regs[2], 0xFFFFFFFF);
 }
+
+UTEST(taro, jmpi) {
+  uint8_t mem[] = {LDI,  0x00, 0x06, 0x00, 0x00, 0x00, LDI,  0x01, 0x0a,
+                   0x00, 0x00, 0x00, JMPI, 0x12, 0x00, 0x00, 0x00, BRK,
+                   LDI,  0x02, 0xFF, 0xFF, 0xFF, 0xFF, BRK};
+  TaroReturn tr = taro_new(sizeof(mem));
+  Taro t = tr.taro;
+  TaroReturnCode rc = taro_load(&t, mem, sizeof(mem));
+  ASSERT_EQ(rc, TARO_OK);
+  ASSERT_EQ(taro_run(&t), TARO_BRK);
+  ASSERT_EQ(t.threads[0].frames[0].pc, 24);
+  ASSERT_EQ(t.threads[0].frames[0].regs[0], 6);
+  ASSERT_EQ(t.threads[0].frames[0].regs[1], 10);
+  ASSERT_EQ(t.threads[0].frames[0].regs[2], 0xFFFFFFFF);
+}

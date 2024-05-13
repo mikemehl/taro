@@ -34,6 +34,11 @@ clean:
 
 .PHONY: test
 test: $(TARO_TEST)
-	$(TARO_TEST)
+	$(TARO_TEST) $(TEST_ARGS)
+
+.PHONY: test-rand
+TEST_ARGS := --random-order
+test-rand: $(TARO_TEST)
+	$(MAKE) test
 
 -include $(TARO_DEPS) $(TEST_DEPS)

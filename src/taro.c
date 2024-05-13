@@ -297,6 +297,17 @@ static TaroReturnCode taro_frame_step(TaroFrame *const frame,
       frame->pc += 4;
     }
     break;
+  case JCNI:
+    rd = OPCODE_RD(taro, frame);
+    frame->pc += 2;
+    imm = NEXT_WORD(taro, frame);
+    CHECK_REGS(rd, 0, 0);
+    if (frame->regs[rd] != 0) {
+      frame->pc = imm;
+    } else {
+      frame->pc += 4;
+    }
+    break;
   case BRK:
     return TARO_BRK;
   case INVALID:

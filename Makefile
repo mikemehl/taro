@@ -51,6 +51,6 @@ test-rand: $(TARO_TEST)
 
 .PHONY: check
 check: $(TARO_TEST) lint
-	valgrind --leak-check=full --track-origins=yes $(TARO_TEST) 
+	valgrind --leak-check=full --track-origins=yes $(TARO_TEST) --random-order
 
 -include $(TARO_DEPS) $(TEST_DEPS)

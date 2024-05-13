@@ -10,6 +10,7 @@ UTEST(taro, init) {
   ASSERT_EQ(tr.taro.num_threads, 1);
   ASSERT_EQ(tr.taro.threads[0].fp, 0);
   ASSERT_EQ(tr.taro.threads[0].frames[0].pc, TARO_EXEC_START);
+  taro_free();
 }
 
 UTEST(taro, load) {
@@ -25,6 +26,7 @@ UTEST(taro, load) {
   for (int i = 0; i < mem_size; i++) {
     ASSERT_EQ(mem_to_load[i], t.mem.mem[i]);
   }
+  taro_free();
 }
 
 UTEST(taro, reset) {
@@ -40,4 +42,5 @@ UTEST(taro, reset) {
   ASSERT_EQ(tr.taro.num_threads, 1);
   ASSERT_EQ(tr.taro.threads[0].fp, 0);
   ASSERT_EQ(tr.taro.threads[0].frames[0].pc, TARO_EXEC_START);
+  taro_free();
 }

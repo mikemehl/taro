@@ -272,3 +272,26 @@ UTEST(opcodes, jmpi) {
   ASSERT_EQ(t.threads[0].frames[0].regs[1], 10);
   ASSERT_EQ(t.threads[0].frames[0].regs[2], 0xFFFFFFFF);
 }
+
+UTEST(opcodes, jcn) {
+  uint8_t mem[] = {LDI,  0x00, 0x07, 0x00, 0x00, 0x00, LDI,  0x01, 0x10, 0x00,
+                   0x00, 0x00, LDI,  0x02, 0x0b, 0x00, 0x00, 0x00, JCN,  0x00,
+                   0x01, 0x02, BRK,  LDI,  0x02, 0xFF, 0xFF, 0xFF, 0xFF, BRK};
+  TaroReturn tr = taro_new(sizeof(mem));
+  Taro t = tr.taro;
+  TaroReturnCode rc = taro_load(&t, mem, sizeof(mem));
+  ASSERT_EQ(rc, TARO_OK);
+  ASSERT_EQ(taro_run(&t), TARO_BRK);
+  ASSERT_EQ(t.threads[0].frames[0].pc, 29);
+  ASSERT_EQ(t.threads[0].frames[0].regs[0], 7);
+  ASSERT_EQ(t.threads[0].frames[0].regs[1], 0x10);
+  ASSERT_EQ(t.threads[0].frames[0].regs[2], 0xFFFFFFFF);
+
+  taro_reset(&t);
+  t.mem.mem[14] = 0x00;
+  ASSERT_EQ(taro_run(&t), TARO_BRK);
+  ASSERT_EQ(t.threads[0].frames[0].pc, 22);
+  ASSERT_EQ(t.threads[0].frames[0].regs[0], 7);
+  ASSERT_EQ(t.threads[0].frames[0].regs[1], 0x10);
+  ASSERT_EQ(t.threads[0].frames[0].regs[2], 0);
+}

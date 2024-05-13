@@ -5,7 +5,8 @@
 #define TARO_STACK_SIZE 256
 #define TARO_MAX_REGISTERS (TARO_STACK_SIZE)
 #define TARO_ZERO_REG TARO_STACK_SIZE - 1
-#define TARO_MAX_MEM_SIZE (1 << 24);
+#define TARO_MAX_MEM_SIZE (1 << 24)
+#define TARO_EXEC_START 0x00
 #define ALLOC_FUNC malloc
 #define DEALLOC_FUNC free
 
@@ -51,4 +52,5 @@ typedef struct TaroReturn {
 TaroReturn taro_new(uint32_t const mem_size);
 TaroReturnCode taro_load(Taro *const taro, uint8_t *mem, uint32_t mem_size);
 TaroReturnCode taro_run(Taro *const taro);
+void taro_reset(Taro *const taro);
 #endif /* ifndef __TARO_H__ */

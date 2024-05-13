@@ -68,6 +68,11 @@ TaroReturnCode taro_load(Taro *const taro, uint8_t *mem, uint32_t mem_size) {
   return TARO_OK;
 }
 
+void taro_reset(Taro *const taro) {
+  taro->threads[0].fp = 0;
+  taro->threads[0].frames[0].pc = TARO_EXEC_START;
+}
+
 #define CHECK_REGS(rd, r1, r2)                                                 \
   do {                                                                         \
     if (rd > TARO_MAX_REGISTERS || r1 > TARO_MAX_REGISTERS ||                  \
@@ -248,6 +253,17 @@ static TaroReturnCode taro_frame_step(TaroFrame *const frame,
     frame->pc += 1;
     imm = NEXT_WORD(taro, frame);
     frame->pc = imm;
+    break;
+  case JCN:
+    rd = OPCODE_RD(taro, frame);
+    r1 = OPCODE_R1(taro, frame);
+    r2 = OPCODE_R2(taro, frame);
+    CHECK_REGS(rd, r1, r2);
+    if (frame->regs[r2] != 0) {
+      frame->pc = frame->regs[rd] + frame->regs[r1];
+    } else {
+      frame->pc += 4;
+    }
     break;
   case BRK:
     return TARO_BRK;

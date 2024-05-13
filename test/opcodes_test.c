@@ -325,27 +325,26 @@ UTEST_F(opcodes, jcni) {
   ASSERT_EQ(t.threads[0].frames[0].regs[2], 0x0b);
 }
 
-UTEST_F(opcodes, call_ret) {
-  UTEST_SKIP("TODO: Test call/ret opcodes.");
-  uint8_t mem[] = {LDI,  0x00, 0x07, 0x00, 0x00, 0x00, LDI,  0x01,
-                   0x10, 0x00, 0x00, 0x00, LDI,  0x02, 0x0b, 0x00,
-                   0x00, 0x00, JCNI, 0x00, 25,   0x00, 0x00, 0x00,
-                   BRK,  LDI,  0x02, 0xFF, 0xFF, 0xFF, 0xFF, BRK};
-  TaroReturn tr = taro_new(sizeof(mem));
-  Taro t = tr.taro;
-  TaroReturnCode rc = taro_load(&t, mem, sizeof(mem));
-  ASSERT_EQ(rc, TARO_OK);
-  ASSERT_EQ(taro_run(&t), TARO_BRK);
-  ASSERT_EQ(t.threads[0].frames[0].pc, 31);
-  ASSERT_EQ(t.threads[0].frames[0].regs[0], 7);
-  ASSERT_EQ(t.threads[0].frames[0].regs[1], 0x10);
-  ASSERT_EQ(t.threads[0].frames[0].regs[2], 0xFFFFFFFF);
+UTEST_F(opcodes, call_ret) { UTEST_SKIP("TODO: Test call/ret opcodes."); }
 
-  taro_reset(&t);
-  t.mem.mem[2] = 0x00;
-  ASSERT_EQ(taro_run(&t), TARO_BRK);
-  ASSERT_EQ(t.threads[0].frames[0].pc, 24);
-  ASSERT_EQ(t.threads[0].frames[0].regs[0], 0);
-  ASSERT_EQ(t.threads[0].frames[0].regs[1], 0x10);
-  ASSERT_EQ(t.threads[0].frames[0].regs[2], 0x0b);
+UTEST_F(opcodes, calli_ret) {
+  UTEST_SKIP("TODO: Implement calli/ret opcodes.");
 }
+
+UTEST_F(opcodes, int) { UTEST_SKIP("TODO: Implement int opcode."); }
+
+UTEST_F(opcodes, brk) { UTEST_SKIP("TODO: Implement brk opcode."); }
+
+UTEST_F(opcodes, thrd) { UTEST_SKIP("TODO: Implement thrd opcode."); }
+
+UTEST_F(opcodes, send) { UTEST_SKIP("TODO: Implement send opcode."); }
+
+UTEST_F(opcodes, join) { UTEST_SKIP("TODO: Implement join opcode."); }
+
+UTEST_F(opcodes, stop) { UTEST_SKIP("TODO: Implement stop opcode."); }
+
+UTEST_F(opcodes, in) { UTEST_SKIP("TODO: Implement in opcode."); }
+
+UTEST_F(opcodes, out) { UTEST_SKIP("TODO: Implement out opcode."); }
+
+UTEST_F(opcodes, dbg) { UTEST_SKIP("TODO: Implement dbg opcode."); }

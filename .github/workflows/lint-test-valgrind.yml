@@ -13,9 +13,11 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - name: install valgrind
-      run: sudo apt-get install build-essential valgrind libc6-dbg
+    - name: apt update
+      run:  sudo apt-get update
+    - name: install tooling
+      run: sudo apt-get install -y build-essential valgrind libc6-dbg clang-tidy bear
     - name: make
-      run: make
-    - name: test and valgrind
+      run: make bear
+    - name: lint, test, and valgrind
       run: make check

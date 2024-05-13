@@ -41,4 +41,8 @@ TEST_ARGS := --random-order
 test-rand: $(TARO_TEST)
 	$(MAKE) test
 
+.PHONY: bear
+bear: clean
+	bear -- $(MAKE) $(TARO_TEST)
+
 -include $(TARO_DEPS) $(TEST_DEPS)
